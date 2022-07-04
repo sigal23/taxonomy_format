@@ -33,12 +33,9 @@ if __name__ == '__main__':
                 elif row[6] == aliasesFields['fully specified name']:
                     concept_dict[row[4]]['fully specified names'].append(row[7])
 
-    for k in concept_dict.keys():
-        print(str(k) + ' ' + str(concept_dict[k]))
-    print('\n')
-
     with open('relationships.txt') as relation:
         is_a_dict = {}
+        concept_without_father = list(concept_dict.keys())
         for line in relation:
             row = line.strip().split('\t')
             if row[2] == '1' and row[7] == '116680003':
@@ -46,14 +43,24 @@ if __name__ == '__main__':
                     is_a_dict[row[5]].append(row[4])
                 else:
                     is_a_dict[row[5]] = [row[4]]
+                if row[4] in concept_without_father:
+                    concept_without_father.remove(row[4])
 
-    for k in is_a_dict.keys():
-        print(str(k) + ' ' + str(is_a_dict[k]))
+    # for k in concept_dict.keys():
+    #     print(str(k) + ' ' + str(concept_dict[k]))
+    # print('\n')
+    # for k in is_a_dict.keys():
+    #     print(str(k) + ' ' + str(is_a_dict[k]))
+    # print('\n')
+    # print(concept_without_father)
 
-    with open("is_a.json") as f:
-        json.dump(is_a_dict, f)
-
-    with open("concepts.json") as f:
+    with open("concepts.json", 'w') as f:
         json.dump(concept_dict, f)
 
-# loaded_json = json.load(f)
+    with open("is_a.json", 'w') as f:
+        json.dump(is_a_dict, f)
+
+    with open("concept_without_father.json", 'w') as f:
+        json.dump(concept_without_father, f)
+
+    # loaded_json = json.load(f)
