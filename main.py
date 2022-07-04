@@ -1,3 +1,4 @@
+import json
 
 if __name__ == '__main__':
 
@@ -48,3 +49,11 @@ if __name__ == '__main__':
 
     for k in is_a_dict.keys():
         print(str(k) + ' ' + str(is_a_dict[k]))
+
+    with open("is_a.json") as f:
+        json.dump(is_a_dict, f)
+
+    with open("concepts.json") as f:
+        json.dump(concept_dict, f)
+
+# loaded_json = json.load(f)
