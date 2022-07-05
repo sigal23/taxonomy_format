@@ -9,6 +9,7 @@ FULLY_SPECIFIED_NAME = '900000000000003001'
 EN_USA = '900000000000509007'
 PREFERRED = '900000000000548007'
 IS_A = '116680003'
+LANGUAGE_CODE = 'en'
 # Relevant file names
 CONCEPT = 'snomed/sct2_Concept_Snapshot_US1000124_20220301.txt'
 LANGUAGE = 'snomed/der2_cRefset_LanguageSnapshot-en_US1000124_20220301.txt'
@@ -17,7 +18,6 @@ RELATIONSHIP = 'snomed/sct2_Relationship_Snapshot_US1000124_20220301.txt'
 
 
 def snomed_extract():
-
     # Save all active concepts in a dictionary called 'concept_dict',
     # where the key is the ID of the concept and the value is a dictionary that contains for each concept:
     # 'name', 'preferred synonym', 'synonyms', 'preferred fully specified name' and 'fully specified names'
@@ -41,11 +41,11 @@ def snomed_extract():
     with open(DESCRIPTION) as desc:
         row_iter = csv.DictReader(desc, delimiter='\t')
         for row in tqdm(row_iter):
-            if row['active'] == ACTIVE and row['languageCode'] == 'en' and row['conceptId'] in concept_dict:
+            if row['active'] == ACTIVE and row['languageCode'] == LANGUAGE_CODE and row['conceptId'] in concept_dict:
                 if row['typeId'] == SYNONYM:
                     if row['id'] in prefer_terms:
                         concept_dict[row['conceptId']]['preferred synonym'].append(row['term'])
-                        # The name of each concept will be the preferred synonym
+                        # The canonical name of each concept will be the preferred synonym
                         concept_dict[row['conceptId']]['name'] = row['term']
                     else:
                         concept_dict[row['conceptId']]['synonyms'].append(row['term'])
@@ -72,11 +72,13 @@ def snomed_extract():
                     concept_without_father.remove(row['sourceId'])
 
     # Saving the relevant data we extracted to json files
-    with open("snomed/concepts_test.json", 'w') as f:
+    with open("snomed/concepts.json", 'w') as f:
         json.dump(concept_dict, f)
 
-    with open("snomed/is_a_test.json", 'w') as f:
+    with open("snomed/is_a.json", 'w') as f:
         json.dump(is_a_dict, f)
 
-    with open("snomed/concept_without_father_test.json", 'w') as f:
+    with open("snomed/concept_without_father.json", 'w') as f:
         json.dump(concept_without_father, f)
+
+    return concept_dict, is_a_dict, concept_without_father
