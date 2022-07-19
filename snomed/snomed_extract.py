@@ -71,6 +71,10 @@ def snomed_extract():
                 if row['sourceId'] in concept_without_father:
                     concept_without_father.remove(row['sourceId'])
 
+    # if we have one root then get all his children instead
+    if len(concept_without_father) == 1:
+        concept_without_father = is_a_dict[concept_without_father[0]]
+
     # Saving the relevant data we extracted to json files
     with open("snomed/concepts.json", 'w') as f:
         json.dump(concept_dict, f)
