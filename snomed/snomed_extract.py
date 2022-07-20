@@ -17,6 +17,7 @@ DESCRIPTION = 'snomed/sct2_Description_Snapshot-en_US1000124_20220301.txt'
 RELATIONSHIP = 'snomed/sct2_Relationship_Snapshot_US1000124_20220301.txt'
 
 
+# A function that extracts from the snomed files the content we need to create our taxonomy format
 def snomed_extract():
     # Save all active concepts in a dictionary called 'concept_dict',
     # where the key is the ID of the concept and the value is a dictionary that contains for each concept:
