@@ -8,7 +8,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # Add an arguments
     parser.add_argument('--extract', default=False, action='store_true')
-    parser.add_argument('--no-extract', dest='extract', action='store_false')
     parser.add_argument('--taxonomy', type=str, required=True)
     # Parse the argument
     args = parser.parse_args()
