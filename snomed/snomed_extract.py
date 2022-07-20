@@ -62,7 +62,8 @@ def snomed_extract():
         concept_without_father = list(concept_dict.keys())
         row_iter = csv.DictReader(relation, delimiter='\t')
         for row in tqdm(row_iter):
-            if row['active'] == ACTIVE and row['typeId'] == IS_A and row['sourceId'] in concept_dict and row['destinationId'] in concept_dict:
+            if row['active'] == ACTIVE and row['typeId'] == IS_A and row['sourceId'] in concept_dict and row[
+                'destinationId'] in concept_dict:
                 if row['destinationId'] in is_a_dict:
                     is_a_dict[row['destinationId']].append(row['sourceId'])
                 else:
@@ -71,9 +72,12 @@ def snomed_extract():
                 if row['sourceId'] in concept_without_father:
                     concept_without_father.remove(row['sourceId'])
 
-    # if we have one root then get all his children instead
+    # If we have one root then get all his children instead
     if len(concept_without_father) == 1:
         concept_without_father = is_a_dict[concept_without_father[0]]
+
+    # Turning the graph into a tree
+    is_a_dict = snomed_is_a_single_father(is_a_dict)
 
     # Saving the relevant data we extracted to json files
     with open("snomed/concepts.json", 'w') as f:
@@ -86,3 +90,47 @@ def snomed_extract():
         json.dump(concept_without_father, f)
 
     return concept_dict, is_a_dict, concept_without_father
+
+
+# A function that receives a dictionary of fathers and their children
+# according to their concept id, and returns a dictionary in the same structure
+# but each concept can have only one father (tree)
+def snomed_is_a_single_father(is_a_dict):
+    # Get descendants by concept id
+    def get_descendants(conc_id):
+        descendants = [conc_id]
+        for child in is_a_dict.get(conc_id, []):
+            descendants += get_descendants(child)
+        return descendants
+
+    child_to_father = {}
+    is_a_single_father = {}
+    disease_descendants = set(get_descendants("404684003"))
+    clinic_find_descendants = set(get_descendants("64572001"))
+
+    # Creating an inverted dictionary - the key is the child and the value is an array of his fathers
+    for f in is_a_dict.keys():
+        for c in is_a_dict[f]:
+            if c in child_to_father and f not in child_to_father[c]:
+                child_to_father[c].append(f)
+            elif c not in child_to_father:
+                child_to_father[c] = [f]
+
+    # Choose the father of a concept according to the following priority - a descendant of a disease,
+    # a descendant of clinical findings, the number of his children
+    # child_to_father will contain child as key and the chosen father as value
+    for c in child_to_father.keys():
+        father_arr = child_to_father[c]
+        if len(father_arr) > 1:
+            father_arr = sorted(father_arr, key=lambda x: (x not in disease_descendants, x not in clinic_find_descendants,
+                                                           -len(is_a_dict[x])))
+        child_to_father[c] = father_arr[0]
+
+    # Create a dictionary of fathers and their children where each concept can have only one father
+    for c, f in child_to_father.items():
+        if f in is_a_single_father and c not in is_a_single_father[f]:
+            is_a_single_father[f].append(c)
+        elif f not in is_a_single_father:
+            is_a_single_father[f] = [c]
+
+    return is_a_single_father

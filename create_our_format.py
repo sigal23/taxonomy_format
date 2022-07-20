@@ -1,8 +1,10 @@
 import json
 
+# numbering the concepts in the hierarchy
 hierarchy_id = 1
 
 
+# A function that creates a json file of taxonomy with our format
 def create_our_format(concept_dict, is_a_dict, concept_without_father, aliases_fields):
     def create_hierarchy(conc_id):
         global hierarchy_id
