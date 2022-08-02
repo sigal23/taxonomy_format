@@ -24,7 +24,7 @@ if __name__ == '__main__':
     # If the taxonomy we want to produce is of 'snomed'
     if taxonomy_name in ["snomed", "Snomed", "SNOMED"]:
         folder_name = "snomed"
-        aliases_fields = ['preferred synonym', 'synonyms', 'preferred fully specified name', 'fully specified names']
+        aliases_fields = ['synonyms', 'preferred fully specified name', 'fully specified names']
         if extract:
             concept_dict, is_a_dict, concept_without_father = snomed_extract()
         else:
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     # If the taxonomy we want to produce is of 'rxnorm'
     if taxonomy_name in ["rxnorm", "RxNorm", "Rxnorm"]:
         folder_name = "rxnorm"
-        aliases_fields = ['ingredient', 'precise ingredient', 'brand name', 'synonyms']
+        aliases_fields = ['ingredient synonyms', 'precise ingredient', 'brand name', 'precise ingredient synonyms', 'brand name synonyms']
         if extract:
             concept_dict, is_a_dict, concept_without_father = rxnorm_extract()
         else:
@@ -52,6 +52,4 @@ if __name__ == '__main__':
     # create our format from the taxonomy
     create_our_format(concept_dict, is_a_dict, concept_without_father, aliases_fields, folder_name)
 
-    # aliases_fields = ['ingredient', 'precise ingredient', 'brand name', 'synonyms']
-    # concept_dict, is_a_dict, concept_without_father = rxnorm_extract()
-    # create_our_format(concept_dict, is_a_dict, concept_without_father, aliases_fields, "rxnorm")
+
