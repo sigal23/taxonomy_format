@@ -6,7 +6,7 @@ import csv
 CONCEPT = 'rxnorm/RXNCONSO.RRF'
 RELATIONSHIP = 'rxnorm/RXNREL.RRF'
 
-
+# A function that extracts from the rxnorm files the content we need to create our taxonomy format
 def rxnorm_extract():
     with open(CONCEPT) as con:
         row_iter = csv.DictReader(con, delimiter='|', fieldnames=["RXCUI", "LAT", "TS", "LUI", "STT", "SUI", "ISPREF",
@@ -37,11 +37,13 @@ def rxnorm_extract():
 
             # If we have finished running through all the lines of a certain concept
             if current_cid != last_cid:
+                # If the concept had a row that is RXNORM or is a concept that we defined from those that
+                # are not RXNORM and put it in the appropriate data structure
                 if had_rxnorm or last_cid in con_no_rxnorm:
                     if bn_in_pin == 'IN' and had_drugbank:
                         concept_dict[last_cid] = {'name': name, 'ingredient synonyms': concept_syn, 'precise ingredient': [],
                                                   'brand name': [], 'precise ingredient synonyms': set(), 'brand name synonyms': set()}
-                        # Saving the dictionary keys (concept id) according to division into rxnorm and those that are not
+                        # Saving the dictionary keys (concept id) according to division hierarchy into rxnorm and those that are not
                         if had_rxnorm:
                             concept_id_dict_key_rxn.add(last_cid)
                         else:
@@ -85,12 +87,12 @@ def rxnorm_extract():
                 had_drugbank = True
 
     with open(RELATIONSHIP) as rel:
-        row_iter = csv.DictReader(rel, delimiter='|',
-                                  fieldnames=["RXCUI1", "RXAUI1", "STYPE1", "REL", "RXCUI2", "RXAUI2", "STYPE2",
-                                              "RELA", "RUI", "SRUI", "SAB", "SL", "RG", "DIR",
-                                              "SUPPRESS", "CVF"])
+        row_iter = csv.DictReader(rel, delimiter='|',fieldnames=["RXCUI1", "RXAUI1", "STYPE1", "REL", "RXCUI2", "RXAUI2", "STYPE2",
+                                                                 "RELA", "RUI", "SRUI", "SAB", "SL", "RG", "DIR",
+                                                                 "SUPPRESS", "CVF"])
         # move over relationship rows
         for row in tqdm(row_iter):
+            # Linking the synonyms to the INs we saved which are RXNORM\NO RXMPRM and adding them to the appropriate alias group
             if (row['SAB'] == 'RXNORM' and row['STYPE1'] == 'CUI' and row['STYPE2'] == 'CUI' and row['RXCUI2'] in concept_id_dict_key_rxn) or\
                     (row['STYPE1'] == 'CUI' and row['STYPE2'] == 'CUI' and row['RXCUI2'] in concept_id_dict_key_no_rxn):
                 if row['RELA'] == 'has_form' and row['RXCUI1'] in concept_dict_pin:
@@ -129,7 +131,7 @@ def rxnorm_extract():
 
     return concept_dict, is_a_dict, concept_without_father
 
-
+# A function that removes duplicate synonyms between concept alias lists and returns concept dict in the same format it received
 def del_dup_syn(concept_dict):
     fix_concept_dict = {}
     prior_list = ['precise ingredient synonyms', 'brand name synonyms', 'ingredient synonyms', 'precise ingredient',
@@ -157,6 +159,7 @@ def del_dup_syn(concept_dict):
     return fix_concept_dict
 
 
+# A function that returns a set of the concepts id that don't have a line containing RXNORM and also have lines whose TTY is IN\BN\PIN
 def get_con_no_rxnorm():
     with open("rxnorm/RXNCONSO.RRF") as con:
         row_iter = csv.DictReader(con, delimiter='|', fieldnames=["RXCUI", "LAT", "TS", "LUI", "STT", "SUI", "ISPREF",
