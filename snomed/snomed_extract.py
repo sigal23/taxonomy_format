@@ -62,8 +62,7 @@ def snomed_extract():
         concept_without_father = list(concept_dict.keys())
         row_iter = csv.DictReader(relation, delimiter='\t')
         for row in tqdm(row_iter):
-            if row['active'] == ACTIVE and row['typeId'] == IS_A and row['sourceId'] in concept_dict and row[
-                'destinationId'] in concept_dict:
+            if row['active'] == ACTIVE and row['typeId'] == IS_A and row['sourceId'] in concept_dict and row['destinationId'] in concept_dict:
                 if row['destinationId'] in is_a_dict:
                     is_a_dict[row['destinationId']].append(row['sourceId'])
                 else:

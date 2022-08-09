@@ -20,9 +20,10 @@ if __name__ == '__main__':
     is_a_dict = {}
     concept_without_father = []
     aliases_fields = []
+    folder_name = ''
 
     # If the taxonomy we want to produce is of 'snomed'
-    if taxonomy_name in ["snomed", "Snomed", "SNOMED"]:
+    if taxonomy_name.lower() == "snomed":
         folder_name = "snomed"
         aliases_fields = ['synonyms', 'preferred fully specified name', 'fully specified names']
         if extract:
@@ -36,7 +37,7 @@ if __name__ == '__main__':
                 concept_without_father = json.load(f)
 
     # If the taxonomy we want to produce is of 'rxnorm'
-    if taxonomy_name in ["rxnorm", "RxNorm", "Rxnorm"]:
+    if taxonomy_name.lower() == "rxnorm":
         folder_name = "rxnorm"
         aliases_fields = ['ingredient synonyms', 'precise ingredient', 'brand name', 'precise ingredient synonyms', 'brand name synonyms']
         if extract:
@@ -51,5 +52,3 @@ if __name__ == '__main__':
 
     # create our format from the taxonomy
     create_our_format(concept_dict, is_a_dict, concept_without_father, aliases_fields, folder_name)
-
-
