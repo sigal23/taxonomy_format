@@ -21,13 +21,13 @@ RELATIONSHIP = 'snomed/sct2_Relationship_Snapshot_US1000124_20220301.txt'
 def snomed_extract():
     # Save all active concepts in a dictionary called 'concept_dict',
     # where the key is the ID of the concept and the value is a dictionary that contains for each concept:
-    # 'name', 'preferred synonym', 'synonyms', 'preferred fully specified name' and 'fully specified names'
+    # 'name', 'synonyms', 'preferred fully specified name' and 'fully specified names'
     with open(CONCEPT) as con:
         concept_dict = {}
         row_iter = csv.DictReader(con, delimiter='\t')
         for row in tqdm(row_iter):
             if row['active'] == ACTIVE:
-                concept_dict[row['id']] = {'name': '', 'preferred synonym': [], 'synonyms': [],
+                concept_dict[row['id']] = {'name': '', 'synonyms': [],
                                            'preferred fully specified name': [], 'fully specified names': []}
 
     # Save the ID of the preferred descriptions in an array called 'prefer_terms'
@@ -45,7 +45,6 @@ def snomed_extract():
             if row['active'] == ACTIVE and row['languageCode'] == LANGUAGE_CODE and row['conceptId'] in concept_dict:
                 if row['typeId'] == SYNONYM:
                     if row['id'] in prefer_terms:
-                        concept_dict[row['conceptId']]['preferred synonym'].append(row['term'])
                         # The canonical name of each concept will be the preferred synonym
                         concept_dict[row['conceptId']]['name'] = row['term']
                     else:
@@ -63,8 +62,7 @@ def snomed_extract():
         concept_without_father = list(concept_dict.keys())
         row_iter = csv.DictReader(relation, delimiter='\t')
         for row in tqdm(row_iter):
-            if row['active'] == ACTIVE and row['typeId'] == IS_A and row['sourceId'] in concept_dict and row[
-                'destinationId'] in concept_dict:
+            if row['active'] == ACTIVE and row['typeId'] == IS_A and row['sourceId'] in concept_dict and row['destinationId'] in concept_dict:
                 if row['destinationId'] in is_a_dict:
                     is_a_dict[row['destinationId']].append(row['sourceId'])
                 else:
