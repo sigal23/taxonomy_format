@@ -3,6 +3,8 @@ import argparse
 from snomed.snomed_extract import snomed_extract
 from create_our_format import create_our_format
 from rxnorm.rxnorm_extract import rxnorm_extract
+from common import ConceptDict, IsADict, ConceptWithoutFather
+from typing import List
 
 if __name__ == '__main__':
     # Create the parser
@@ -16,11 +18,11 @@ if __name__ == '__main__':
     taxonomy_name = args.taxonomy
 
     # The files required to create our taxonomy format
-    concept_dict = {}
-    is_a_dict = {}
-    concept_without_father = []
-    aliases_fields = []
-    folder_name = ''
+    concept_dict: ConceptDict = {}
+    is_a_dict: IsADict = {}
+    concept_without_father: ConceptWithoutFather = []
+    aliases_fields: List[str] = []
+    folder_name: str = ''
 
     # If the taxonomy we want to produce is of 'snomed'
     if taxonomy_name.lower() == "snomed":

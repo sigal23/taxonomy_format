@@ -1,6 +1,8 @@
 import json
 from tqdm import tqdm
 import csv
+from typing import List, Dict, Tuple, Set
+from common import AliasObject, ConceptDict, IsADict, ConceptWithoutFather
 
 # Relevant file names
 CONCEPT = 'rxnorm/RXNCONSO.RRF'
@@ -8,7 +10,7 @@ RELATIONSHIP = 'rxnorm/RXNREL.RRF'
 
 
 # A function that extracts from the rxnorm files the content we need to create our taxonomy format
-def rxnorm_extract():
+def rxnorm_extract() -> Tuple[ConceptDict, IsADict, ConceptWithoutFather]:
     with open(CONCEPT) as con:
         row_iter = csv.DictReader(con, delimiter='|', fieldnames=["RXCUI", "LAT", "TS", "LUI", "STT", "SUI", "ISPREF",
                                                                   "RXAUI", "SAUI", "SCUI", "SDUI", "SAB", "TTY", "CODE",
@@ -16,23 +18,23 @@ def rxnorm_extract():
         con_row = [dict(x) for x in list(row_iter)]
 
     # Initialize the parameters for the first concept
-    concept_dict = {}
-    concept_dict_pin = {}
-    concept_dict_bn = {}
-    last_cid = 'initialize'
-    bn_in_pin = ''
-    had_rxnorm = False
-    had_drugbank = False
-    concept_syn = set()
-    name = ''
-    concept_id_dict_key_rxn = set()
-    con_no_rxnorm = get_con_no_rxnorm()
-    concept_id_dict_key_no_rxn = set()
+    concept_dict: ConceptDict = {}
+    concept_dict_pin: Dict[str, List[AliasObject]] = {}
+    concept_dict_bn: Dict[str, List[AliasObject]] = {}
+    last_cid: str = 'initialize'
+    bn_in_pin: str = ''
+    had_rxnorm: bool = False
+    had_drugbank: bool = False
+    concept_syn: Set[str] = set()
+    name: str = ''
+    concept_id_dict_key_rxn: Set[str] = set()
+    con_no_rxnorm: Set[str] = get_con_no_rxnorm()
+    concept_id_dict_key_no_rxn: Set[str] = set()
 
     # move over concepts rows
     for row in tqdm(con_row):
         # current concept id
-        current_cid = row['RXCUI']
+        current_cid: str = row['RXCUI']
 
         # initialize for the first run
         if last_cid == 'initialize':
@@ -118,8 +120,8 @@ def rxnorm_extract():
                               'brand name': [], 'precise ingredient synonyms': [], 'brand name synonyms': []}
     concept_dict['others'] = {'name': 'Others', 'ingredient synonyms': [], 'precise ingredient': [],
                               'brand name': [], 'precise ingredient synonyms': [], 'brand name synonyms': []}
-    concept_without_father = ['rxnorm', 'others']
-    is_a_dict = {'rxnorm': list(concept_id_dict_key_rxn), 'others': list(concept_id_dict_key_no_rxn)}
+    concept_without_father: ConceptWithoutFather = ['rxnorm', 'others']
+    is_a_dict: IsADict = {'rxnorm': list(concept_id_dict_key_rxn), 'others': list(concept_id_dict_key_no_rxn)}
 
     # Saving the relevant data we extracted to json files
     with open("rxnorm/concepts.json", 'w') as f:
@@ -135,7 +137,7 @@ def rxnorm_extract():
 
 
 # A function that removes duplicate synonyms between concept alias lists and returns concept dict in the same format it received
-def del_dup_syn(concept_dict):
+def del_dup_syn(concept_dict: ConceptDict) -> ConceptDict:
     fix_concept_dict = {}
     prior_list = ['precise ingredient synonyms', 'brand name synonyms', 'ingredient synonyms', 'precise ingredient',
                   'brand name', 'name']
@@ -163,7 +165,7 @@ def del_dup_syn(concept_dict):
 
 
 # A function that returns a set of the concepts id that don't have a line containing RXNORM and also have lines whose TTY is IN\BN\PIN
-def get_con_no_rxnorm():
+def get_con_no_rxnorm() -> Set[str]:
     with open(CONCEPT) as con:
         row_iter = csv.DictReader(con, delimiter='|', fieldnames=["RXCUI", "LAT", "TS", "LUI", "STT", "SUI", "ISPREF",
                                                                   "RXAUI", "SAUI", "SCUI", "SDUI", "SAB", "TTY", "CODE",
@@ -171,8 +173,8 @@ def get_con_no_rxnorm():
 
         con_row = [dict(x) for x in list(row_iter)]
 
-    rxnorm_con = set()
-    con_id_bn_in_pin = set()
+    rxnorm_con: Set[str] = set()
+    con_id_bn_in_pin: Set[str] = set()
 
     for row in con_row:
         if row['TTY'] in ('BN', 'IN', 'PIN') and row['SAB'] == 'RXNORM':

@@ -1,4 +1,6 @@
 import json
+from common import ConceptDict, IsADict, ConceptWithoutFather
+from typing import List
 
 # numbering the concepts in the hierarchy
 hierarchy_id = 1
@@ -11,9 +13,10 @@ hierarchy_id = 1
 # concept_without_father - an array that contains the concepts ID that doesn't have a father - to know where to start building the hierarchy
 # aliases_fields - an array that contains alias group names
 # folder_name - folder name (str) where we want to save the taxonomy in our format
-def create_our_format(concept_dict, is_a_dict, concept_without_father, aliases_fields, folder_name):
+def create_our_format(concept_dict: ConceptDict, is_a_dict: IsADict, concept_without_father: ConceptWithoutFather,
+                      aliases_fields: List[str], folder_name: str):
     # A recursive function that creates the hierarchy of concepts
-    def create_hierarchy(conc_id):
+    def create_hierarchy(conc_id: str):
         global hierarchy_id
         hierarchy_id = hierarchy_id + 1
         aliases = {}

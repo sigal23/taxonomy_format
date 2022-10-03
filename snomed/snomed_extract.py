@@ -1,6 +1,8 @@
 import json
 from tqdm import tqdm
 import csv
+from typing import List, Tuple
+from common import ConceptDict, IsADict, ConceptWithoutFather
 
 # Relevant IDs
 ACTIVE = '1'
@@ -18,7 +20,7 @@ RELATIONSHIP = 'snomed/sct2_Relationship_Snapshot_US1000124_20220301.txt'
 
 
 # A function that extracts from the snomed files the content we need to create our taxonomy format
-def snomed_extract():
+def snomed_extract() -> Tuple[ConceptDict, IsADict, ConceptWithoutFather]:
     # Save all active concepts in a dictionary called 'concept_dict',
     # where the key is the ID of the concept and the value is a dictionary that contains for each concept:
     # 'name', 'synonyms', 'preferred fully specified name' and 'fully specified names'
@@ -32,7 +34,7 @@ def snomed_extract():
 
     # Save the ID of the preferred descriptions in an array called 'prefer_terms'
     with open(LANGUAGE) as lang:
-        prefer_terms = []
+        prefer_terms: List[str] = []
         row_iter = csv.DictReader(lang, delimiter='\t')
         for row in tqdm(row_iter):
             if row['active'] == ACTIVE and row['refsetId'] == EN_USA and row['acceptabilityId'] == PREFERRED:
@@ -94,9 +96,9 @@ def snomed_extract():
 # A function that receives a dictionary of fathers and their children
 # according to their concept id, and returns a dictionary in the same structure
 # but each concept can have only one father (tree)
-def snomed_is_a_single_father(is_a_dict):
+def snomed_is_a_single_father(is_a_dict: IsADict) -> IsADict:
     # Get descendants by concept id
-    def get_descendants(conc_id):
+    def get_descendants(conc_id: str) -> List[str]:
         descendants = [conc_id]
         for child in is_a_dict.get(conc_id, []):
             descendants += get_descendants(child)
